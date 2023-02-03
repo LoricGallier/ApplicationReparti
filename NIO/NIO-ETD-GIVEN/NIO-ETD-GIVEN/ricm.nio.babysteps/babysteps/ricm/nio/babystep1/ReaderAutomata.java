@@ -10,6 +10,13 @@ public class ReaderAutomata {
     ByteBuffer buffer; 
     byte[] msg;
 
+    void process_msg(){
+        if (state == State.READING_LENGTH){
+            if(msg != null)
+                System.out.println("NioClient received msg : "+msg.length);
+        }
+    }
+
     void handleRead(SocketChannel sc) throws IOException{
         int length;
         byte[] data = new byte[buffer.limit()];

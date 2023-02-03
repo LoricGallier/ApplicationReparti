@@ -36,6 +36,9 @@ public class NioServer {
 	ByteBuffer outBuffer;
 	ByteBuffer inBuffer;
 
+	private ReaderAutomata RA = new ReaderAutomata();
+	private WriterAutomata WA = new WriterAutomata();
+
 	/**
 	 * NIO server initialization
 	 * 
@@ -133,6 +136,8 @@ public class NioServer {
 
 		// get the socket channel on which the incoming data waits to be received
 		SocketChannel sc = (SocketChannel) key.channel();
+
+		//RA.handleRead(sc);
 
 		inBuffer = ByteBuffer.allocate(INBUFFER_SZ);
 		int n = sc.read(inBuffer);
