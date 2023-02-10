@@ -44,6 +44,11 @@ public class NioClient {
 
 	int nloops;
 
+	//create automata
+
+	private ReaderAutomata RA = new ReaderAutomata();
+	private WriterAutomata WA = new WriterAutomata();
+
 	/**
 	 * NIO client initialization
 	 * 
@@ -70,6 +75,8 @@ public class NioClient {
 		InetAddress addr;
 		addr = InetAddress.getByName(serverName);
 		sc.connect(new InetSocketAddress(addr, port));
+
+		
 	}
 
 	/**
@@ -92,9 +99,9 @@ public class NioClient {
 				if (key.isValid() && key.isAcceptable())   // accept event
 					handleAccept(key);
 				if (key.isValid() && key.isReadable())     // read event
-					handleRead(key);
+					RA.handleRead(sc);
 				if (key.isValid() && key.isWritable())     // write event
-					handleWrite(key);
+					WA.handleWrite(sc);
 				if (key.isValid() && key.isConnectable())  // connect event
 					handleConnect(key);
 			}
@@ -125,6 +132,7 @@ public class NioClient {
 		// once connected, send a message to the server
 		digest = md5(first);
 		send(first, 0, first.length);
+		WA.sendMsg(first);
 	}
 
 	/**
@@ -208,7 +216,7 @@ public class NioClient {
 		String msg = "Hello There...";
 		String arg;
 
-		for (int i = 0; i < args.length; i++) {
+		/*for (int i = 0; i < args.length; i++) {
 			arg = args[i];
 			if (arg.equals("-m")) {
 				msg = args[++i];
@@ -217,8 +225,9 @@ public class NioClient {
 			} else if (arg.equals("-a")) {
 				serverAddress = args[++i];
 			}
-		}
+		}*/
 		byte[] bytes = msg.getBytes(Charset.forName("UTF-8"));
+		System.out.println(bytes);
 		NioClient nc = new NioClient(serverAddress, serverPort, bytes);
 		nc.loop();
 	}

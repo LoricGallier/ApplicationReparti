@@ -3,21 +3,25 @@ package ricm.nio.babystep1;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 
 public class ReaderAutomata {
     enum State {READING_LENGTH, READING_MSG} ;
     State state = State.READING_LENGTH ;
-    ByteBuffer buffer; 
+    ByteBuffer buffer = ByteBuffer.allocate(4); 
+    ByteBuffer lengthbuf = ByteBuffer.allocate(4); 
     byte[] msg;
 
-    void process_msg(){
-        if (state == State.READING_LENGTH){
-            if(msg != null)
-                System.out.println("NioClient received msg : "+msg.length);
-        }
+
+
+    public void process_msg(){
+        System.out.println("NioClient received msg : "+msg.length);
+        System.out.println("msg recu : "+new String(this.msg, StandardCharsets.UTF_8));
+
+        
     }
 
-    void handleRead(SocketChannel sc) throws IOException{
+    public void handleRead(SocketChannel sc) throws IOException{
         int length;
         byte[] data = new byte[buffer.limit()];
 
@@ -25,11 +29,14 @@ public class ReaderAutomata {
         //<read the message knowing that it is composed of length bytes>
         if (state == State.READING_LENGTH) {   
 
-            sc.read(buffer); 
+            sc.read(lengthbuf); 
 
-            if (buffer.position() > 3){
-                buffer.rewind();
-                length = buffer.getInt(); 
+            if (lengthbuf.remaining() == 0){
+                lengthbuf.rewind();
+                length = lengthbuf.getInt(); 
+                lengthbuf.rewind();
+                buffer = ByteBuffer.allocate(length);
+                //if(length!=0) System.out.println("taille msg recu:" + length);
                 data = new byte[length];
                 state = State.READING_MSG;
             }                     
@@ -42,9 +49,13 @@ public class ReaderAutomata {
             sc.read(buffer);
 
             if (buffer.remaining() == 0){
+                data = new byte[buffer.limit()];
+                buffer.rewind();
                 buffer.get(data);
+                buffer = ByteBuffer.allocate(4);
                 state = State.READING_LENGTH;
                 this.msg = data;
+                process_msg();
             }
             //<continue reading the msg>
             //<if all bytes composing the msg have been read,

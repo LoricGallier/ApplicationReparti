@@ -86,10 +86,11 @@ public class NioServer {
 				// process the event
 				if (key.isValid() && key.isAcceptable())  // accept event
 					handleAccept(key);
-				if (key.isValid() && key.isReadable())    // read event
-					handleRead(key);
+				if (key.isValid() && key.isReadable()){   // read event
+					RA.handleRead((SocketChannel) key.channel());
+				}   
 				if (key.isValid() && key.isWritable())    // write event
-					handleWrite(key);
+					WA.handleWrite((SocketChannel) key.channel());
 				if (key.isValid() && key.isConnectable())  // connect event
 					handleConnect(key);
 			}
@@ -112,7 +113,7 @@ public class NioServer {
 		sc.configureBlocking(false);
 
 		// register a READ interest on sc to receive the message sent by the client
-		sc.register(selector, SelectionKey.OP_READ);
+		SelectionKey k = sc.register(selector, SelectionKey.OP_READ);
 	}
 
 	/**
