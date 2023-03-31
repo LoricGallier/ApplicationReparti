@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="ifaces"/>
+	<classpathentry kind="src" path="impl"/>
+	<classpathentry kind="src" path="ricmlets"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
