@@ -2,33 +2,24 @@ package httpserver.itf.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
-import httpserver.itf.HttpRequest;
 import httpserver.itf.HttpResponse;
 import httpserver.itf.HttpRicmletRequest;
 import httpserver.itf.HttpSession;
 import httpserver.itf.HttpRicmletResponse;
 import httpserver.itf.HttpRicmlet;
 
-import examples.HelloRicmlet;
-
 /*
  * This class allows to build an object representing an HTTP dynamic request
  */
 public class HttpRicmletRequestImpl extends HttpRicmletRequest {
-
-    protected HttpSession session;
     private HashMap<String, String> arguments = new HashMap<String, String>();
+    public HashMap<String, String> cookies = new HashMap<>();
 
     public HttpRicmletRequestImpl(HttpServer hs, String method, String ressname, BufferedReader br) throws IOException {
         super(hs, method, ressname, br);
-        this.session = null;
         String[] argsLine = ressname.split("\\?");
         if (argsLine.length > 1) {
             String[] args = argsLine[1].split("\\&");
@@ -38,13 +29,26 @@ public class HttpRicmletRequestImpl extends HttpRicmletRequest {
             }
         }
 
+        String line = br.readLine();
+        while (line.length() != 0) {
+            if (line.startsWith("Cookie: ")) {
+                String[] split = line.replaceAll("Cookie: ", "").split("=");
+                cookies.put(split[0], split[1]);
+            }
+            line = br.readLine();
+        }
     }
 
     public HttpSession getSession() {
-        if (session == null) {
-            session = new Session(this.m_hs, "0");
+        String session_id = (String) this.getCookie("session-id");
+        if (session_id == null || m_hs.sessions.get(session_id) == null) {
+            Session s = new Session(m_hs, new Integer(Session.newId()).toString());
+            m_hs.sessions.put(s.getId(), s);
+            this.cookies.put("session-id", s.getId());
+            return s;
         }
-        return session;
+
+        return m_hs.sessions.get(session_id);
     }
 
     public String getArg(String name) {
@@ -52,10 +56,7 @@ public class HttpRicmletRequestImpl extends HttpRicmletRequest {
     }
 
     public Object getCookie(String name) {
-        if (getSession() != null) {
-            return getSession().getValue(name);
-        }
-        return null;
+        return this.cookies.get(name);
     }
 
     @Override

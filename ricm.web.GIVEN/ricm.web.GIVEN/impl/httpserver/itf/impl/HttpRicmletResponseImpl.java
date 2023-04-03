@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import httpserver.itf.HttpRequest;
-import httpserver.itf.HttpRicmletRequest;
 import httpserver.itf.HttpRicmletResponse;
 
 /*
@@ -26,12 +26,16 @@ class HttpRicmletResponseImpl implements HttpRicmletResponse {
     public void setReplyOk() {
         m_ps.println("HTTP/1.0 200 OK");
         m_ps.println("Date: " + new Date());
-        m_ps.print("Set-Cookie: ");
-        Set<String> cookiesName = m_hs.getCookiesName(((HttpRicmletRequest) m_req).getSession().getId());
-        for (String name : cookiesName) {
-            m_ps.print(name + "=" + m_hs.getCookie(((HttpRicmletRequest) m_req).getSession().getId(), name) + ";");
+        
+        Set<Entry<String, String>> cookies = ((HttpRicmletRequestImpl) m_req).cookies.entrySet();
+        if (cookies.size() > 0) {
+            m_ps.print("Set-Cookie: ");
+            for (Entry<String, String> cookie : cookies) {
+                m_ps.print(cookie.getKey() + "=" + cookie.getValue() + ";");
+            }
+            m_ps.println();
         }
-        m_ps.println("");
+        
         m_ps.println("Server: ricm-http 1.0");
     }
 
@@ -67,7 +71,7 @@ class HttpRicmletResponseImpl implements HttpRicmletResponse {
 
     @Override
     public void setCookie(String name, String value) {
-        this.m_hs.setCookie(((HttpRicmletRequestImpl) this.m_req).getSession().getId(), name, value);
+        ((HttpRicmletRequestImpl) this.m_req).cookies.put(name, value);
     }
 
 }

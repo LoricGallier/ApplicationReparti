@@ -37,7 +37,7 @@ public class HttpServer {
 	private ServerSocket m_ssoc;
 
 	private HashMap<String, HttpRicmlet> instances = new HashMap<>();
-	private HashMap<String, Session> sessions = new HashMap<>();
+	public HashMap<String, Session> sessions = new HashMap<>();
 
 	protected HttpServer(int port, String folderName) {
 		m_port = port;
@@ -132,34 +132,6 @@ public class HttpServer {
 			HttpServer hs = new HttpServer(port, foldername);
 			hs.loop();
 		}
-	}
-
-	public void setCookie(String id, String name, String value) {
-		Session s = this.sessions.get(id);
-		if (s == null) {
-			s = new Session(this, id);
-			this.sessions.put(id, s);
-		}
-		s.setValue(name, value);
-	}
-
-	public String getCookie(String id, String name) {
-		Session s = this.sessions.get(id);
-		if (s == null) {
-			s = new Session(this, id);
-			this.sessions.put(id, s);
-			return null;
-		}
-		return s.getValue(name).toString();
-	}
-
-	public Set<String> getCookiesName(String id) {
-		Session s = this.sessions.get(id);
-		if (s == null) {
-			s = new Session(this, id);
-			this.sessions.put(id, s);
-		}
-		return s.getCookiesName();
 	}
 
 }

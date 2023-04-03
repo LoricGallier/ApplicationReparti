@@ -10,6 +10,7 @@ class Session implements HttpSession {
     private String id;
     private HttpServer hs;
     private HashMap<String, Object> cookies = new HashMap<>();
+    static int counter;
 
     public Session(HttpServer hs, String id) {
         this.id = id;
@@ -34,5 +35,8 @@ class Session implements HttpSession {
     public Set<String> getCookiesName() {
         return this.cookies.keySet();
     }
-
+    
+    public static synchronized int newId () {
+        return Session.counter++;
+    }
 }
